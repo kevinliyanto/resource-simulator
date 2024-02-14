@@ -14,10 +14,10 @@ func generateRandomMaterial() *Material {
 	}
 }
 
-func Generate1000RandomMaterials() *[1000]*Material {
-	var arr [1000]*Material
+func Generate1000RandomMaterials() *[100000]*Material {
+	var arr [100000]*Material
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100000; i++ {
 		arr[i] = generateRandomMaterial()
 	}
 

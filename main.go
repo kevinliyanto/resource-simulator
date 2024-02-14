@@ -43,7 +43,7 @@ func main() {
 		r1.AddResource(&Resource{
 			resource: v,
 		})
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(1 * time.Millisecond)
 	}
 
 	timeAfterAddRandom := r1.timeLastCaptured.UnixMilli()
