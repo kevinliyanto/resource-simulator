@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	math_rand "math/rand"
 	"time"
 )
 
@@ -35,38 +33,8 @@ func GenerateEmptyResource() *Resource {
 	}
 }
 
-func GenerateRandomResource() *Resource {
-	defaultRate := Material{
-		Iron:   10.0,
-		Copper: 10.0,
-		Coal:   10.0,
-		Water:  5.0,
-	}
-
-	defaultLimit := Material{
-		Iron:   80000.0,
-		Copper: 80000.0,
-		Coal:   80000.0,
-		Water:  24000.0,
-	}
-
-	return &Resource{
-		resource: &Material{
-			Iron:   defaultLimit.Iron * math_rand.Float64(),
-			Copper: defaultLimit.Copper * math_rand.Float64(),
-			Coal:   defaultLimit.Coal * math_rand.Float64(),
-			Water:  defaultLimit.Water * math_rand.Float64(),
-		},
-		resourceRate:     &defaultRate,
-		resourceLimit:    &defaultLimit,
-		timeLastCaptured: time.Now(),
-	}
-}
-
 func (r *Resource) calculateOnResourceRate(timeOnCalculation *time.Time) {
 	durationSinceLastCalculation := timeOnCalculation.Sub(r.timeLastCaptured)
-
-	fmt.Println("Duration since last calculation", durationSinceLastCalculation)
 
 	resourceDiff := r.resourceRate.calculateMaterialDiff(&durationSinceLastCalculation)
 	r.addMaterial(resourceDiff)
@@ -80,7 +48,8 @@ func (r *Resource) addMaterial(m *Material) {
 }
 
 func (resourceRate *Material) calculateMaterialDiff(d *time.Duration) *Material {
-	duration := float64(d.Milliseconds()) / 1000
+	// Calculated up to milisecond for most precise calculation
+	duration := float64(d.Nanoseconds()) / 1e9
 
 	return &Material{
 		Iron:   resourceRate.Iron * duration,
@@ -99,4 +68,6 @@ func (r *Resource) AddResource(ext *Resource) {
 	r.resource.Copper += ext.resource.Copper
 	r.resource.Coal += ext.resource.Coal
 	r.resource.Water += ext.resource.Water
+
+	r.timeLastCaptured = timeOnCalculation
 }
