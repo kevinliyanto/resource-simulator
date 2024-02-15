@@ -48,7 +48,7 @@ func (r *Resource) addMaterial(m *Material) {
 }
 
 func (resourceRate *Material) calculateMaterialDiff(d *time.Duration) *Material {
-	// Calculated up to milisecond for most precise calculation
+	// Calculated up to nanosecond for most precise calculation
 	duration := float64(d.Nanoseconds()) / 1e9
 
 	return &Material{
