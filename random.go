@@ -3,10 +3,12 @@ package main
 import (
 	math_rand "math/rand"
 	"time"
+
+	types "github.com/kevinliyanto/resource-simulator/types"
 )
 
-func generateRandomMaterial() *Material {
-	return &Material{
+func generateRandomMaterial() *types.Material {
+	return &types.Material{
 		Iron:   float64(math_rand.Intn(10)),
 		Copper: float64(math_rand.Intn(10)),
 		Coal:   float64(math_rand.Intn(10)),
@@ -14,8 +16,8 @@ func generateRandomMaterial() *Material {
 	}
 }
 
-func Generate1000RandomMaterials() *[100000]*Material {
-	var arr [100000]*Material
+func Generate1000RandomMaterials() *[100000]*types.Material {
+	var arr [100000]*types.Material
 
 	for i := 0; i < 100000; i++ {
 		arr[i] = generateRandomMaterial()
@@ -24,30 +26,30 @@ func Generate1000RandomMaterials() *[100000]*Material {
 	return &arr
 }
 
-func GenerateRandomResource() *Storage {
-	defaultRate := Material{
+func GenerateRandomResource() *types.Storage {
+	defaultRate := types.Material{
 		Iron:   10.0,
 		Copper: 10.0,
 		Coal:   10.0,
 		Water:  5.0,
 	}
 
-	defaultLimit := Material{
+	defaultLimit := types.Material{
 		Iron:   80000.0,
 		Copper: 80000.0,
 		Coal:   80000.0,
 		Water:  24000.0,
 	}
 
-	return &Storage{
-		resource: &Material{
+	return &types.Storage{
+		Resource: &types.Material{
 			Iron:   defaultLimit.Iron * math_rand.Float64(),
 			Copper: defaultLimit.Copper * math_rand.Float64(),
 			Coal:   defaultLimit.Coal * math_rand.Float64(),
 			Water:  defaultLimit.Water * math_rand.Float64(),
 		},
-		resourceRate:     &defaultRate,
-		resourceLimit:    &defaultLimit,
-		timeLastCaptured: time.Now(),
+		ResourceRate:     &defaultRate,
+		ResourceLimit:    &defaultLimit,
+		TimeLastCaptured: time.Now(),
 	}
 }

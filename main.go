@@ -5,9 +5,11 @@ import (
 	"math"
 	"sync"
 	"time"
+
+	types "github.com/kevinliyanto/resource-simulator/types"
 )
 
-func addResourceConcurrently(wg *sync.WaitGroup, originResource *Storage, additionalResource *Storage) {
+func addResourceConcurrently(wg *sync.WaitGroup, originResource *types.Storage, additionalResource *types.Storage) {
 	defer wg.Done()
 
 	originResource.AddResource(additionalResource)
@@ -17,7 +19,7 @@ func addResourceConcurrently(wg *sync.WaitGroup, originResource *Storage, additi
 func main() {
 	materials := Generate1000RandomMaterials()
 
-	sumMaterial := &Material{}
+	sumMaterial := &types.Material{}
 
 	for _, v := range materials {
 		sumMaterial.Iron += v.Iron
@@ -29,10 +31,10 @@ func main() {
 	fmt.Println("Random material sum", sumMaterial)
 
 	r1 := GenerateRandomResource()
-	fmt.Println("r1", r1.resource)
+	fmt.Println("r1", r1.Resource)
 
-	r2 := GenerateEmptyResource()
-	fmt.Println("r2", r2.resource)
+	r2 := types.GenerateEmptyResource()
+	fmt.Println("r2", r2.Resource)
 
 	fmt.Println("Adding resource from r2 to r1 after 10 seconds")
 
@@ -41,17 +43,17 @@ func main() {
 
 	r1.AddResource(r2)
 
-	fmt.Println("r1", r1.resource, "time on capture", r1.timeLastCaptured.UnixMilli())
+	fmt.Println("r1", r1.Resource, "time on capture", r1.TimeLastCaptured.UnixMilli())
 
 	fmt.Println("=== Adding random materials ===")
 
-	timeBeforeAddRandom := r1.timeLastCaptured.UnixMilli()
-	ironBeforeAddRandom := r1.resource.Iron
-	fmt.Println("r1", r1.resource, "time on capture", timeBeforeAddRandom)
+	timeBeforeAddRandom := r1.TimeLastCaptured.UnixMilli()
+	ironBeforeAddRandom := r1.Resource.Iron
+	fmt.Println("r1", r1.Resource, "time on capture", timeBeforeAddRandom)
 
 	for i, v := range materials {
-		r1.AddResource(&Storage{
-			resource: v,
+		r1.AddResource(&types.Storage{
+			Resource: v,
 		})
 		time.Sleep(1 * time.Millisecond)
 
@@ -60,22 +62,22 @@ func main() {
 		}
 	}
 
-	timeAfterAddRandom := r1.timeLastCaptured.UnixMilli()
-	ironAfterAddRandom := r1.resource.Iron
-	fmt.Println("r1", r1.resource, "time on capture", timeAfterAddRandom)
+	timeAfterAddRandom := r1.TimeLastCaptured.UnixMilli()
+	ironAfterAddRandom := r1.Resource.Iron
+	fmt.Println("r1", r1.Resource, "time on capture", timeAfterAddRandom)
 
 	delta := ironAfterAddRandom - (ironBeforeAddRandom + sumMaterial.Iron)
 	deltaRate := delta * 1000 / (float64(timeAfterAddRandom - timeBeforeAddRandom))
 
-	rateDiff := math.Abs(deltaRate - r1.resourceRate.Iron)
+	rateDiff := math.Abs(deltaRate - r1.ResourceRate.Iron)
 	fmt.Println("Rate during add random", deltaRate)
 	fmt.Println("Rate diff due to floating point rounding", rateDiff, "per second")
 
 	fmt.Println("=== Concurrent ===")
 
-	timeBeforeAddRandom = r1.timeLastCaptured.UnixMilli()
-	ironBeforeAddRandom = r1.resource.Iron
-	fmt.Println("r1", r1.resource, "time on capture", timeBeforeAddRandom)
+	timeBeforeAddRandom = r1.TimeLastCaptured.UnixMilli()
+	ironBeforeAddRandom = r1.Resource.Iron
+	fmt.Println("r1", r1.Resource, "time on capture", timeBeforeAddRandom)
 
 	fmt.Println("Adding random materials concurrently")
 
@@ -86,8 +88,8 @@ func main() {
 		wg.Add(waitGroupSize)
 
 		for materialIdx := 0; materialIdx < waitGroupSize; materialIdx++ {
-			createdResource := &Storage{
-				resource: materials[i*10+materialIdx],
+			createdResource := &types.Storage{
+				Resource: materials[i*10+materialIdx],
 			}
 
 			go addResourceConcurrently(&wg, r1, createdResource)
@@ -97,14 +99,14 @@ func main() {
 		fmt.Println("Waiting for resource batch", i, "done")
 	}
 
-	timeAfterAddRandom = r1.timeLastCaptured.UnixMilli()
-	ironAfterAddRandom = r1.resource.Iron
-	fmt.Println("r1", r1.resource, "time on capture", timeAfterAddRandom)
+	timeAfterAddRandom = r1.TimeLastCaptured.UnixMilli()
+	ironAfterAddRandom = r1.Resource.Iron
+	fmt.Println("r1", r1.Resource, "time on capture", timeAfterAddRandom)
 
 	delta = ironAfterAddRandom - (ironBeforeAddRandom + sumMaterial.Iron)
 	deltaRate = delta * 1000 / (float64(timeAfterAddRandom - timeBeforeAddRandom))
 
-	rateDiff = math.Abs(deltaRate - r1.resourceRate.Iron)
+	rateDiff = math.Abs(deltaRate - r1.ResourceRate.Iron)
 	fmt.Println("Rate during add random concurrent without proper locking", deltaRate)
 	fmt.Println("Rate diff due to floating point rounding & non-proper resource locking", rateDiff, "per second")
 }
