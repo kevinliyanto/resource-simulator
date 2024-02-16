@@ -24,7 +24,7 @@ func Generate1000RandomMaterials() *[100000]*Material {
 	return &arr
 }
 
-func GenerateRandomResource() *Resource {
+func GenerateRandomResource() *Storage {
 	defaultRate := Material{
 		Iron:   10.0,
 		Copper: 10.0,
@@ -39,7 +39,7 @@ func GenerateRandomResource() *Resource {
 		Water:  24000.0,
 	}
 
-	return &Resource{
+	return &Storage{
 		resource: &Material{
 			Iron:   defaultLimit.Iron * math_rand.Float64(),
 			Copper: defaultLimit.Copper * math_rand.Float64(),

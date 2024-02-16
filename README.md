@@ -1,6 +1,6 @@
-# Resource simulator
+# Storage simulator
 
-Resource simulator
+Storage simulator
 
 ## TODOs
 

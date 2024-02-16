@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func addResourceConcurrently(wg *sync.WaitGroup, originResource *Resource, additionalResource *Resource) {
+func addResourceConcurrently(wg *sync.WaitGroup, originResource *Storage, additionalResource *Storage) {
 	defer wg.Done()
 
 	originResource.AddResource(additionalResource)
@@ -50,7 +50,7 @@ func main() {
 	fmt.Println("r1", r1.resource, "time on capture", timeBeforeAddRandom)
 
 	for i, v := range materials {
-		r1.AddResource(&Resource{
+		r1.AddResource(&Storage{
 			resource: v,
 		})
 		time.Sleep(1 * time.Millisecond)
@@ -86,7 +86,7 @@ func main() {
 		wg.Add(waitGroupSize)
 
 		for materialIdx := 0; materialIdx < waitGroupSize; materialIdx++ {
-			createdResource := &Resource{
+			createdResource := &Storage{
 				resource: materials[i*10+materialIdx],
 			}
 
