@@ -42,14 +42,14 @@ func GenerateRandomResource() *types.Storage {
 	}
 
 	return &types.Storage{
-		Resource: &types.Material{
+		ResourceContainer: &types.Material{
 			Iron:   defaultLimit.Iron * math_rand.Float64(),
 			Copper: defaultLimit.Copper * math_rand.Float64(),
 			Coal:   defaultLimit.Coal * math_rand.Float64(),
 			Water:  defaultLimit.Water * math_rand.Float64(),
 		},
-		ResourceRate:     &defaultRate,
-		ResourceLimit:    &defaultLimit,
-		TimeLastCaptured: time.Now(),
+		ResourceRate:           &defaultRate,
+		ResourceContainerLimit: &defaultLimit,
+		TimeLastCaptured:       time.Now(),
 	}
 }

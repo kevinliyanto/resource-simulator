@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"sync"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 func addResourceConcurrently(wg *sync.WaitGroup, originResource *types.Storage, additionalResource *types.Storage) {
 	defer wg.Done()
 
-	originResource.AddResource(additionalResource)
+	originResource.TransferResourceFrom(additionalResource)
 	time.Sleep(1000 * time.Millisecond)
 }
 
@@ -31,29 +30,27 @@ func main() {
 	fmt.Println("Random material sum", sumMaterial)
 
 	r1 := GenerateRandomResource()
-	fmt.Println("r1", r1.Resource)
+	fmt.Println("r1", r1.ResourceContainer)
 
-	r2 := types.GenerateEmptyResource()
-	fmt.Println("r2", r2.Resource)
+	r2 := types.GenerateEmptyStorage()
+	fmt.Println("r2", r2.ResourceContainer)
 
 	fmt.Println("Adding resource from r2 to r1 after 10 seconds")
 
-	duration, _ := time.ParseDuration("10s")
-	time.Sleep(duration)
+	time.Sleep(10 * time.Second)
 
-	r1.AddResource(r2)
+	r1.TransferResourceFrom(r2)
 
-	fmt.Println("r1", r1.Resource, "time on capture", r1.TimeLastCaptured.UnixMilli())
+	fmt.Println("r1", r1.ResourceContainer, "time on capture", r1.TimeLastCaptured.UnixMilli())
 
 	fmt.Println("=== Adding random materials ===")
 
-	timeBeforeAddRandom := r1.TimeLastCaptured.UnixMilli()
-	ironBeforeAddRandom := r1.Resource.Iron
-	fmt.Println("r1", r1.Resource, "time on capture", timeBeforeAddRandom)
+	r1StorageStateInitial := getStorageState(r1)
+	fmt.Println("r1 storage state", r1StorageStateInitial.printStatus())
 
 	for i, v := range materials {
-		r1.AddResource(&types.Storage{
-			Resource: v,
+		r1.TransferResourceFrom(&types.Storage{
+			ResourceContainer: v,
 		})
 		time.Sleep(1 * time.Millisecond)
 
@@ -62,22 +59,17 @@ func main() {
 		}
 	}
 
-	timeAfterAddRandom := r1.TimeLastCaptured.UnixMilli()
-	ironAfterAddRandom := r1.Resource.Iron
-	fmt.Println("r1", r1.Resource, "time on capture", timeAfterAddRandom)
+	r1StorageStateFinal := getStorageState(r1)
+	fmt.Println("r1 storage state", r1StorageStateFinal.printStatus())
 
-	delta := ironAfterAddRandom - (ironBeforeAddRandom + sumMaterial.Iron)
-	deltaRate := delta * 1000 / (float64(timeAfterAddRandom - timeBeforeAddRandom))
+	deltaStorageState := r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
 
-	rateDiff := math.Abs(deltaRate - r1.ResourceRate.Iron)
-	fmt.Println("Rate during add random", deltaRate)
-	fmt.Println("Rate diff due to floating point rounding", rateDiff, "per second")
+	fmt.Println("r1 storage rate differential", deltaStorageState)
 
 	fmt.Println("=== Concurrent ===")
 
-	timeBeforeAddRandom = r1.TimeLastCaptured.UnixMilli()
-	ironBeforeAddRandom = r1.Resource.Iron
-	fmt.Println("r1", r1.Resource, "time on capture", timeBeforeAddRandom)
+	r1StorageStateInitial = getStorageState(r1)
+	fmt.Println("r1 storage state", r1StorageStateInitial.printStatus())
 
 	fmt.Println("Adding random materials concurrently")
 
@@ -89,7 +81,7 @@ func main() {
 
 		for materialIdx := 0; materialIdx < waitGroupSize; materialIdx++ {
 			createdResource := &types.Storage{
-				Resource: materials[i*10+materialIdx],
+				ResourceContainer: materials[i*10+materialIdx],
 			}
 
 			go addResourceConcurrently(&wg, r1, createdResource)
@@ -99,14 +91,10 @@ func main() {
 		fmt.Println("Waiting for resource batch", i, "done")
 	}
 
-	timeAfterAddRandom = r1.TimeLastCaptured.UnixMilli()
-	ironAfterAddRandom = r1.Resource.Iron
-	fmt.Println("r1", r1.Resource, "time on capture", timeAfterAddRandom)
+	r1StorageStateFinal = getStorageState(r1)
+	fmt.Println("r1 storage state", r1StorageStateFinal.printStatus())
 
-	delta = ironAfterAddRandom - (ironBeforeAddRandom + sumMaterial.Iron)
-	deltaRate = delta * 1000 / (float64(timeAfterAddRandom - timeBeforeAddRandom))
+	deltaStorageState = r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
 
-	rateDiff = math.Abs(deltaRate - r1.ResourceRate.Iron)
-	fmt.Println("Rate during add random concurrent without proper locking", deltaRate)
-	fmt.Println("Rate diff due to floating point rounding & non-proper resource locking", rateDiff, "per second")
+	fmt.Println("r1 storage rate differential", deltaStorageState)
 }
