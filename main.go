@@ -64,7 +64,7 @@ func main() {
 
 	deltaStorageState := r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
 
-	fmt.Println("r1 storage rate differential", deltaStorageState)
+	fmt.Println("r1 storage rate differential", deltaStorageState.printStatus())
 
 	fmt.Println("=== Concurrent ===")
 
@@ -96,5 +96,5 @@ func main() {
 
 	deltaStorageState = r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
 
-	fmt.Println("r1 storage rate differential", deltaStorageState)
+	fmt.Println("r1 storage rate differential", deltaStorageState.printStatus())
 }

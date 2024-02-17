@@ -8,7 +8,8 @@ import (
 
 type StorageState struct {
 	material *types.Material
-	time     int64
+	// Time in unix ms
+	time int64
 }
 
 func getStorageState(r *types.Storage) *StorageState {
@@ -27,7 +28,14 @@ func (s *StorageState) printStatus() string {
 	return fmt.Sprintf("%+v at timestamp %v", s.material, s.time)
 }
 
-type StorageStateRate types.Material
+type StorageStateRate struct {
+	Iron   float64
+	Copper float64
+	Coal   float64
+	Water  float64
+	// Time diff in unix seconds
+	time int64
+}
 
 func (final *StorageState) deltaStorageState(initial *StorageState, offset *types.Material) *StorageStateRate {
 	time := (final.time - initial.time) / 1e3
@@ -35,7 +43,12 @@ func (final *StorageState) deltaStorageState(initial *StorageState, offset *type
 	return &StorageStateRate{
 		Iron:   (final.material.Iron - (initial.material.Iron + offset.Iron)) / float64(time),
 		Copper: (final.material.Copper - (initial.material.Copper + offset.Copper)) / float64(time),
-		Coal:   (final.material.Coal - (initial.material.Coal + offset.Copper)) / float64(time),
+		Coal:   (final.material.Coal - (initial.material.Coal + offset.Coal)) / float64(time),
 		Water:  (final.material.Water - (initial.material.Water + offset.Water)) / float64(time),
+		time:   time,
 	}
+}
+
+func (s *StorageStateRate) printStatus() string {
+	return fmt.Sprintf("%+v within period of %v seconds", s, s.time)
 }
