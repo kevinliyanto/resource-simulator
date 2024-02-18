@@ -7,10 +7,10 @@ import (
 
 // Rate per 1000 ms or time.ParseDuration("1s")
 type Rate struct {
-	Iron   float64
-	Copper float64
-	Coal   float64
-	Water  float64
+	Iron   Iron
+	Copper Copper
+	Coal   Coal
+	Water  Water
 }
 
 func (resourceRate *Rate) getMaterialDifferenceFromDuration(d *time.Duration) *Material {

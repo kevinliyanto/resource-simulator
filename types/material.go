@@ -1,10 +1,10 @@
 package types
 
 type Material struct {
-	Iron   float64
-	Copper float64
-	Coal   float64
-	Water  float64
+	Iron   Iron
+	Copper Copper
+	Coal   Coal
+	Water  Water
 }
 
 func (r *Material) addMaterial(m *Material) {
