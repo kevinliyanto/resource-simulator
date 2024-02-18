@@ -1,9 +1,5 @@
 package types
 
-import (
-	"time"
-)
-
 type Material struct {
 	Iron   float64
 	Copper float64
@@ -11,14 +7,9 @@ type Material struct {
 	Water  float64
 }
 
-func (resourceRate *Material) getMaterialDifferenceFromDuration(d *time.Duration) *Material {
-	// Calculated up to nanosecond for most precise calculation
-	duration := float64(d.Nanoseconds()) / 1e9
-
-	return &Material{
-		Iron:   resourceRate.Iron * duration,
-		Copper: resourceRate.Copper * duration,
-		Coal:   resourceRate.Coal * duration,
-		Water:  resourceRate.Water * duration,
-	}
+func (r *Material) addMaterial(m *Material) {
+	r.Iron += m.Iron
+	r.Copper += m.Copper
+	r.Coal += m.Coal
+	r.Water += m.Water
 }

@@ -2,53 +2,64 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/kevinliyanto/resource-simulator/types"
 )
 
 type StorageState struct {
-	material *types.Material
+	iron   float64
+	copper float64
+	coal   float64
+	water  float64
 	// Time in unix ms
-	time int64
+	time time.Time
 }
 
 func getStorageState(r *types.Storage) *StorageState {
 	return &StorageState{
-		material: &types.Material{
-			Iron:   r.ResourceContainer.Iron,
-			Copper: r.ResourceContainer.Copper,
-			Coal:   r.ResourceContainer.Coal,
-			Water:  r.ResourceContainer.Water,
-		},
-		time: r.TimeLastCaptured.UnixMilli(),
+		iron:   r.ResourceContainer.Iron,
+		copper: r.ResourceContainer.Copper,
+		coal:   r.ResourceContainer.Coal,
+		water:  r.ResourceContainer.Water,
+		time:   time.UnixMilli(r.TimeLastCaptured.UnixMilli()),
 	}
 }
 
 func (s *StorageState) printStatus() string {
-	return fmt.Sprintf("%+v at timestamp %v", s.material, s.time)
+	return fmt.Sprintf("%+v at timestamp %v", s, s.time.UnixMilli())
 }
 
 type StorageStateRate struct {
-	Iron   float64
-	Copper float64
-	Coal   float64
-	Water  float64
+	rate *types.Rate
 	// Time diff in unix seconds
-	time int64
+	time time.Duration
 }
 
 func (final *StorageState) deltaStorageState(initial *StorageState, offset *types.Material) *StorageStateRate {
-	time := (final.time - initial.time) / 1e3
+	timeDiff := final.time.Sub(initial.time)
+	timeDiffSeconds := float64(timeDiff.Seconds())
 
 	return &StorageStateRate{
-		Iron:   (final.material.Iron - (initial.material.Iron + offset.Iron)) / float64(time),
-		Copper: (final.material.Copper - (initial.material.Copper + offset.Copper)) / float64(time),
-		Coal:   (final.material.Coal - (initial.material.Coal + offset.Coal)) / float64(time),
-		Water:  (final.material.Water - (initial.material.Water + offset.Water)) / float64(time),
-		time:   time,
+		rate: &types.Rate{
+			Iron:   (final.iron - (initial.iron + offset.Iron)) / timeDiffSeconds,
+			Copper: (final.copper - (initial.copper + offset.Copper)) / timeDiffSeconds,
+			Coal:   (final.coal - (initial.coal + offset.Coal)) / timeDiffSeconds,
+			Water:  (final.water - (initial.water + offset.Water)) / timeDiffSeconds,
+		},
+		time: timeDiff,
 	}
 }
 
 func (s *StorageStateRate) printStatus() string {
-	return fmt.Sprintf("%+v within period of %v seconds", s, s.time)
+	return fmt.Sprintf("%+v within period of %v seconds", s.rate, s.time.Seconds())
+}
+
+func (finalState *StorageStateRate) getRateDrift(originalRate *types.Rate) *types.Rate {
+	return &types.Rate{
+		Iron:   finalState.rate.Iron - originalRate.Iron,
+		Copper: finalState.rate.Copper - originalRate.Copper,
+		Coal:   finalState.rate.Coal - originalRate.Coal,
+		Water:  finalState.rate.Water - originalRate.Water,
+	}
 }

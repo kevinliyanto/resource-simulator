@@ -35,17 +35,27 @@ func main() {
 	r2 := types.GenerateEmptyStorage()
 	fmt.Println("r2", r2.ResourceContainer)
 
-	fmt.Println("Adding resource from r2 to r1 after 10 seconds")
+	fmt.Println("=== Adding empty materials ===")
 
+	r1StorageStateInitial := getStorageState(r1)
+	fmt.Println("r1 storage state", r1StorageStateInitial.printStatus())
+
+	// TODO: reorder getStorageState to get resource on TimeLastCaptured = time.Now()
 	time.Sleep(10 * time.Second)
-
 	r1.TransferResourceFrom(r2)
 
-	fmt.Println("r1", r1.ResourceContainer, "time on capture", r1.TimeLastCaptured.UnixMilli())
+	r1StorageStateFinal := getStorageState(r1)
+	fmt.Println("r1 storage state", r1StorageStateFinal.printStatus())
+
+	deltaStorageState := r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
+
+	fmt.Println("r1 storage rate differential", deltaStorageState.printStatus())
+
+	fmt.Println("r1 rate drift", deltaStorageState.getRateDrift(r1.ResourceRate).PrintStatus())
 
 	fmt.Println("=== Adding random materials ===")
 
-	r1StorageStateInitial := getStorageState(r1)
+	r1StorageStateInitial = getStorageState(r1)
 	fmt.Println("r1 storage state", r1StorageStateInitial.printStatus())
 
 	for i, v := range materials {
@@ -59,12 +69,14 @@ func main() {
 		}
 	}
 
-	r1StorageStateFinal := getStorageState(r1)
+	r1StorageStateFinal = getStorageState(r1)
 	fmt.Println("r1 storage state", r1StorageStateFinal.printStatus())
 
-	deltaStorageState := r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
+	deltaStorageState = r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
 
 	fmt.Println("r1 storage rate differential", deltaStorageState.printStatus())
+
+	fmt.Println("r1 rate drift", deltaStorageState.getRateDrift(r1.ResourceRate).PrintStatus())
 
 	fmt.Println("=== Concurrent ===")
 
@@ -97,4 +109,6 @@ func main() {
 	deltaStorageState = r1StorageStateFinal.deltaStorageState(r1StorageStateInitial, sumMaterial)
 
 	fmt.Println("r1 storage rate differential", deltaStorageState.printStatus())
+
+	fmt.Println("r1 rate drift", deltaStorageState.getRateDrift(r1.ResourceRate).PrintStatus())
 }

@@ -27,7 +27,7 @@ func Generate1000RandomMaterials() *[100000]*types.Material {
 }
 
 func GenerateRandomResource() *types.Storage {
-	defaultRate := types.Material{
+	defaultRate := types.Rate{
 		Iron:   10.0,
 		Copper: 10.0,
 		Coal:   10.0,
